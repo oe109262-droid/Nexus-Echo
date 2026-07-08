@@ -1,0 +1,13 @@
+{
+  "name": "NexusEcho by VortexLabs",
+  "short_name": "NexusEcho",
+  "description": "A fully local, in-browser AI workspace — no server, no API keys.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B0E14",
+  "theme_color": "#0B0E14",
+  "icons": [
+    { "src": "assets/icons/vortex.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

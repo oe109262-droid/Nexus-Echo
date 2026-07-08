@@ -1,0 +1,10 @@
+/* =========================================================
+   responsive.css — breakpoints, always loaded last
+   ========================================================= */
+@media (max-width:900px){
+  .app{ grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+  .sidebar{ border-right:none; border-bottom:1px solid var(--border); max-height:46vh; }
+  .mcp-grid{ grid-template-columns:1fr; }
+  .msg{ max-width:90%; }
+  .sync-provider-btn{ min-width:0; }
+}

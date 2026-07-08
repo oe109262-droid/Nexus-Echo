@@ -1,0 +1,51 @@
+/* =========================================================
+   base.css — reset, typography, buttons, form fields
+   ========================================================= */
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  transition:background .25s ease, color .25s ease;
+}
+button, input, textarea, select{ font-family:inherit; color:inherit; }
+button{ cursor:pointer; }
+h1,h2,h3{ font-family:var(--font-display); margin:0; }
+::selection{ background:var(--accent); color:#fff; }
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
+
+.btn{
+  border:1px solid var(--border);
+  background:var(--panel-raised);
+  color:var(--text);
+  padding:10px 16px;
+  border-radius:var(--radius-sm);
+  font-weight:600;
+  font-size:14px;
+  transition:transform .1s ease, border-color .15s ease, background .15s ease;
+}
+.btn:hover{ border-color:var(--accent); }
+.btn:active{ transform:scale(.98); }
+.btn-block{ width:100%; }
+.btn-primary{ background:linear-gradient(135deg,var(--accent),var(--echo)); border:none; color:#0B0E14; }
+.btn-secondary{ background:transparent; }
+.btn-ghost{ background:transparent; border:1px solid transparent; color:var(--text-dim); }
+.btn-oauth{ text-align:left; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.btn.sm{ padding:6px 10px; font-size:12px; }
+
+.field{ display:block; margin-bottom:14px; font-size:13px; color:var(--text-dim); }
+.field span{ display:block; margin-bottom:6px; }
+.field input{ width:100%; padding:11px 12px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--panel-raised); color:var(--text); font-size:14px; }
+.field input:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+.card{ background:var(--panel); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; }
+
+.brand-mark{
+  width:34px; height:34px; border-radius:10px; display:inline-block;
+  background-size:cover; background-position:center;
+}

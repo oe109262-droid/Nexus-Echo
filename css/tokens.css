@@ -1,0 +1,42 @@
+/* =========================================================
+   tokens.css — NexusEcho design tokens
+   "Signal" theme: deep indigo-night surface, violet-blue
+   "vortex" accent, teal "echo" accent, amber for alerts.
+   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg:            #0B0E14;
+  --panel:         #12161F;
+  --panel-raised:  #171C27;
+  --border:        #232938;
+  --text:          #E7E9EE;
+  --text-dim:      #9AA3B5;
+  --text-faint:    #5C6579;
+  --accent:        #7C8FFF;
+  --accent-dim:    #4C5AA8;
+  --echo:          #2DD4BF;
+  --amber:         #FFB86B;
+  --danger:        #FF6B6B;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html[data-theme="light"]{
+  --bg:            #F4F5F8;
+  --panel:         #FFFFFF;
+  --panel-raised:  #FBFBFD;
+  --border:        #E1E4EA;
+  --text:          #171A21;
+  --text-dim:      #565E70;
+  --text-faint:    #8B93A3;
+  --accent:        #5B6FE0;
+  --accent-dim:    #C9CFF7;
+  --echo:          #0F9C8C;
+  --amber:         #B9720A;
+  --danger:        #D6473F;
+}

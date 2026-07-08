@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>NexusEcho — VortexLabs</title>
+<meta name="description" content="NexusEcho by VortexLabs — a fully local, in-browser AI workspace." />
+<meta name="theme-color" content="#0B0E14" />
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" id="favicon" href="assets/icons/vortex.svg" />
+
+<!-- Styles, split by concern -->
+<link rel="stylesheet" href="css/tokens.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/gate.css" />
+<link rel="stylesheet" href="css/shell.css" />
+<link rel="stylesheet" href="css/chat.css" />
+<link rel="stylesheet" href="css/panels.css" />
+<link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- SECURITY GATE — simulated sign-in, client-side only -->
+<!-- ============================================================ -->
+<section id="gate" class="gate">
+  <div class="gate-card">
+    <div class="gate-brand">
+      <span id="gate-logo" class="brand-mark" aria-hidden="true"></span>
+      <h1>NexusEcho</h1>
+      <p class="gate-sub">by VortexLabs</p>
+    </div>
+
+    <p class="gate-copy">Sign in to unlock your local AI workspace. This gate is simulated — no real authentication happens here. Google and Microsoft sign-in double as your cloud sync connection later, in Settings.</p>
+
+    <div class="gate-tabs">
+      <button class="gate-tab active" data-gatetab="cloud">Google / Microsoft</button>
+      <button class="gate-tab" data-gatetab="email">Email</button>
+      <button class="gate-tab" data-gatetab="guest">Guest</button>
+    </div>
+
+    <div class="gate-panel active" data-gatepanel="cloud">
+      <button class="btn btn-oauth btn-block" data-provider="Google">Continue with Google</button>
+      <button class="btn btn-oauth btn-block" data-provider="Microsoft">Continue with Microsoft</button>
+      <p class="gate-note">This just unlocks the app UI. To actually turn on cross-device sync, connect a provider from Settings after you're in.</p>
+    </div>
+
+    <form id="gate-email-form" class="gate-panel" data-gatepanel="email">
+      <label class="field">
+        <span>Email address</span>
+        <input type="email" id="gate-email" placeholder="you@vortexlabs.dev" required />
+      </label>
+      <label class="field">
+        <span>Passphrase</span>
+        <input type="password" id="gate-pass" placeholder="••••••••" required minlength="4" />
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">Unlock workspace</button>
+      <p class="gate-note">Local-only session — not connected to cloud sync.</p>
+    </form>
+
+    <div class="gate-panel" data-gatepanel="guest">
+      <p class="gate-copy">Skip the form and explore NexusEcho as a guest. Chat history stays in this browser only, unless you connect sync later.</p>
+      <button class="btn btn-primary btn-block" id="gate-guest-btn">Continue as Guest</button>
+    </div>
+
+    <p id="gate-error" class="gate-error" hidden></p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- BANNED SCREEN — shown when strike threshold reached -->
+<!-- ============================================================ -->
+<section id="banned" class="gate" hidden>
+  <div class="gate-card banned-card">
+    <span class="brand-mark banned-mark" aria-hidden="true">⛔</span>
+    <h1>Access suspended</h1>
+    <p class="gate-copy">
+      This account was flagged by the local moderation check for content that violates NexusEcho's usage rules.
+      Strike <strong id="banned-strike-count">3</strong> of 3 has been recorded for this browser profile.
+    </p>
+    <p class="gate-copy banned-strong">We do not appeal bans.</p>
+    <p class="gate-note">
+      This is a local, simulated enforcement demo — a static site with no backend cannot actually verify identities,
+      track real accounts, or enforce a real IP ban. If you encounter genuinely illegal content anywhere,
+      report it to the platform involved and, for child exploitation material, to
+      <strong>NCMEC (CyberTipline)</strong> or your local authorities — not through an app-level ban.
+    </p>
+    <button class="btn btn-secondary btn-block" id="banned-reset-btn">Reset local demo data</button>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- MAIN APP SHELL -->
+<!-- ============================================================ -->
+<div id="app" class="app" hidden>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span id="app-logo" class="brand-mark" aria-hidden="true"></span>
+      <div class="brand-text">
+        <strong id="app-name">NexusEcho</strong>
+        <small>VortexLabs</small>
+      </div>
+      <button class="icon-btn" id="new-chat-btn" title="New chat">+</button>
+    </div>
+
+    <div class="model-picker">
+      <label for="model-select">Model</label>
+      <select id="model-select">
+        <option value="ne1">NexusEcho 1 · fast, mobile/CPU</option>
+        <option value="ne15" selected>NexusEcho 1.5 · balanced, WebGPU</option>
+        <option value="ne2">NexusEcho 2 · premier reasoning, GPU</option>
+      </select>
+    </div>
+
+    <div class="control-row">
+      <label class="switch-row">
+        <span>Thinking mode</span>
+        <input type="checkbox" id="thinking-toggle" />
+      </label>
+      <label class="field-inline">
+        <span>Effort</span>
+        <select id="effort-select">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="control-row">
+      <label class="field-inline full">
+        <span>Tools</span>
+        <div class="tool-chip-row" id="tool-chips">
+          <button class="tool-chip active" data-tool="knowledge">Knowledge Lookup</button>
+          <button class="tool-chip active" data-tool="calculator">Calculator</button>
+          <button class="tool-chip active" data-tool="media">Media Links</button>
+        </div>
+      </label>
+    </div>
+
+    <div class="chat-list-header"><span>Chats</span></div>
+    <div class="chat-list" id="chat-list"></div>
+
+    <nav class="tab-nav" id="tab-nav">
+      <button class="tab-btn active" data-tab="chat">💬 Chat</button>
+      <button class="tab-btn" data-tab="devhub">🛠 Dev Hub</button>
+      <button class="tab-btn" data-tab="mcp">🧩 MCP</button>
+      <button class="tab-btn" data-tab="downloads">⬇ Downloads</button>
+      <button class="tab-btn" data-tab="settings">⚙ Settings</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- CHAT TAB -->
+    <section class="tab-panel active" data-panel="chat">
+      <header class="chat-header">
+        <div>
+          <h2 id="chat-title">New chat</h2>
+          <p class="chat-sub" id="chat-status">Idle</p>
+        </div>
+        <svg id="echo-wave" class="echo-wave" viewBox="0 0 240 40" preserveAspectRatio="none" aria-hidden="true">
+          <path id="echo-wave-path" d="M0,20 L240,20" fill="none" stroke="url(#waveGrad)" stroke-width="2"/>
+          <defs>
+            <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#7C8FFF"/>
+              <stop offset="100%" stop-color="#2DD4BF"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </header>
+
+      <div class="messages" id="messages"></div>
+
+      <form class="composer" id="composer">
+        <div class="composer-attachments" id="composer-attachments"></div>
+        <div class="composer-row">
+          <button type="button" class="icon-btn" id="attach-btn" title="Attach image">📎</button>
+          <input type="file" id="image-input" accept="image/*" hidden multiple />
+          <textarea id="composer-input" rows="1" placeholder="Message NexusEcho… (paste an image too)"></textarea>
+          <button type="submit" class="btn btn-primary" id="send-btn">Send</button>
+        </div>
+        <p class="composer-hint">Runs entirely on your device — no server, no API key. Replies in whatever language you write in.</p>
+      </form>
+    </section>
+
+    <!-- DEV HUB TAB -->
+    <section class="tab-panel" data-panel="devhub">
+      <header class="panel-header"><h2>Dev Hub</h2><p>Real-time engine telemetry for the active session.</p></header>
+      <div class="devhub-grid">
+        <div class="card metric-card"><span class="metric-label">Tokens / sec</span><span class="metric-value" id="metric-tps">—</span></div>
+        <div class="card metric-card"><span class="metric-label">Execution backend</span><span class="metric-value" id="metric-backend">—</span></div>
+        <div class="card metric-card"><span class="metric-label">Active model</span><span class="metric-value" id="metric-model">NexusEcho 1.5</span></div>
+        <div class="card metric-card"><span class="metric-label">Session tokens</span><span class="metric-value" id="metric-tokens">0</span></div>
+      </div>
+      <div class="card log-card">
+        <div class="log-card-header"><span>Developer Log</span><button class="btn btn-ghost sm" id="clear-log-btn">Clear</button></div>
+        <div class="log-scroll" id="dev-log"></div>
+      </div>
+    </section>
+
+    <!-- MCP TAB -->
+    <section class="tab-panel" data-panel="mcp">
+      <header class="panel-header"><h2>MCP Storage</h2><p>Edit and simulate a Model Context Protocol server configuration.</p></header>
+      <div class="mcp-grid">
+        <textarea id="mcp-json" class="mcp-editor" spellcheck="false"></textarea>
+        <div class="mcp-side">
+          <button class="btn btn-secondary btn-block" id="mcp-validate-btn">Validate JSON</button>
+          <button class="btn btn-primary btn-block" id="mcp-simulate-btn">Simulate connection</button>
+          <div class="mcp-status" id="mcp-status">No connection simulated yet.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOWNLOADS TAB -->
+    <section class="tab-panel" data-panel="downloads">
+      <header class="panel-header"><h2>Downloads</h2><p>Mock cross-platform wrappers for NexusEcho.</p></header>
+      <div class="downloads-grid" id="downloads-grid"></div>
+      <div class="card log-card">
+        <div class="log-card-header"><span>Downloads Audit Log</span></div>
+        <table class="audit-table">
+          <thead><tr><th>Timestamp</th><th>Platform</th><th>File</th><th>SHA-256</th></tr></thead>
+          <tbody id="audit-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SETTINGS TAB -->
+    <section class="tab-panel" data-panel="settings">
+      <header class="panel-header"><h2>Settings</h2><p>Interface, branding, cloud sync, and behavior.</p></header>
+
+      <div class="settings-grid">
+
+        <div class="card sync-card">
+          <h3>Cloud sync</h3>
+          <p class="settings-note">Stores one private file in your own Drive/OneDrive — never your regular files — so your chats follow you across devices.</p>
+          <div class="sync-providers">
+            <button class="btn btn-secondary sync-provider-btn" data-sync-provider="google">
+              <span class="sync-dot"></span><span class="sync-btn-label">Connect Google Drive</span>
+            </button>
+            <button class="btn btn-secondary sync-provider-btn" data-sync-provider="microsoft">
+              <span class="sync-dot"></span><span class="sync-btn-label">Connect Microsoft OneDrive</span>
+            </button>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost sm" id="sync-now-btn">Sync now</button>
+            <button class="btn btn-ghost sm" id="sync-disconnect-btn">Disconnect</button>
+          </div>
+          <div class="sync-status" id="sync-status">Not connected — chats stay on this device only.</div>
+        </div>
+
+        <div class="card">
+          <h3>Theme</h3>
+          <div class="segmented" id="theme-segmented">
+            <button data-theme-choice="system">System</button>
+            <button data-theme-choice="dark" class="active">Dark</button>
+            <button data-theme-choice="light">Light</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>App icon</h3>
+          <div class="icon-choices" id="icon-choices">
+            <button class="icon-choice active" data-icon="vortex" title="Vortex Wave"></button>
+            <button class="icon-choice" data-icon="echo" title="Echo Sphere"></button>
+            <button class="icon-choice" data-icon="matrix" title="Matrix Core"></button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Code generation</h3>
+          <label class="switch-row"><span>Strip comments from generated code</span><input type="checkbox" id="no-comments-toggle" /></label>
+        </div>
+
+        <div class="card">
+          <h3>Safety &amp; moderation</h3>
+          <p class="settings-note">Image moderation strikes on this browser: <strong id="strike-display">0</strong> / 3</p>
+          <button class="btn btn-ghost sm" id="reset-strikes-btn">Reset strikes (demo)</button>
+        </div>
+
+        <div class="card">
+          <h3>Session</h3>
+          <button class="btn btn-secondary btn-block" id="signout-btn">Sign out</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
